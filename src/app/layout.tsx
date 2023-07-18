@@ -18,11 +18,10 @@ const baiJamjuree = BaiJamjuree({
 })
 
 export const metadata = {
-  title: 'NLW SpaceTime',
+  title: 'NLW Spacetime',
   description:
-    'Uma Cápsula do tempo construída com React, Next.js, Tailwind e Typescript',
+    'Uma cápsula do tempo construída com React, Next.js, TailwindCSS e Typescript.',
 }
-
 export default function RootLayout({ children }: { children: ReactNode }) {
   const isAuthenticated = cookies().has('token')
   return (

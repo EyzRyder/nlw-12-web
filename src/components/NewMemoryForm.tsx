@@ -1,8 +1,55 @@
+'use client'
+
 import { Camera } from 'lucide-react'
+import MidiaPicker from './MidiaPicker'
+import { FormEvent } from 'react'
+import { api } from '@/lib/api'
+import Cookie from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 export default function NewMemoryForm() {
+  const router = useRouter()
+
+  async function handleCreateMemory(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    // console.log(
+    //   '🚀 ~ file: NewMemoryForm.tsx:11 ~ handleCreateMemory ~ formData:',
+    //   Array.from(formData.entries()),
+    // )
+    const fileToUpload = formData.get('coverUrl')
+
+    let coverUrl = ''
+
+    if (fileToUpload) {
+      const uploadFormData = new FormData()
+      uploadFormData.set('file', fileToUpload)
+
+      const uploadResponse = await api.post('/upload', uploadFormData)
+
+      coverUrl = uploadResponse.data.fileUrl
+    }
+
+    const token = Cookie.get('token')
+
+    await api.post(
+      '/memories',
+      {
+        coverUrl,
+        content: formData.get('content'),
+        isPublic: formData.get('isPublic'),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+
+    router.push('/')
+  }
   return (
-    <form className="flex flex-1 flex-col gap-2">
+    <form onSubmit={handleCreateMemory} className="flex flex-1 flex-col gap-2">
       <div className="flex items-center gap-4">
         <label
           htmlFor="media"
@@ -11,21 +58,22 @@ export default function NewMemoryForm() {
           <Camera className="h-4 w-4" />
           Anexar Midia
         </label>
+
         <label
           htmlFor="isPublic"
           className="flex items-center gap-1.5 text-sm text-gray-200 hover:text-gray-100"
         >
           <input
             type="checkbox"
-            id="isPublic"
             name="isPublic"
+            id="isPublic"
             className="h-4 w-4 rounded border-gray-400 bg-gray-700 text-purple-500"
             value="true"
           />
           Tornar memoria publica
         </label>
-        <input type="file" id="media" className="invisible h-0 w-0" />
       </div>
+      <MidiaPicker />
       <textarea
         name="content"
         spellCheck={false}
